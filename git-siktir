@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# version: 1.0 (04-09-2020)
+
+TMP_BRANCHES_FILE="/tmp/git-siktir-branches"
+
+CURRENT_BRANCH=`git branch --show-current`
+
+git fetch --prune
+
+git branch -vv | grep ': gone]' | sed 's/^./ /g' | awk '{print $1}' > $TMP_BRANCHES_FILE
+
+if grep -q $CURRENT_BRANCH "$TMP_BRANCHES_FILE"; then
+	echo "Current branch is eligible for deletion! Please checkout another branch and try again."
+	exit
+fi
+
+if [[ ! -s $TMP_BRANCHES_FILE ]]; then
+	echo "No branches to siktir!"
+	exit
+fi
+
+vi $TMP_BRANCHES_FILE
+
+xargs git branch -D < $TMP_BRANCHES_FILE
+
